@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظم المهام الذكي - ليلة النجوم</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 15px;
+            font-family: 'Cairo', sans-serif;
+            background: #030b1e url('2052301f8dd32b0d48a802e0674441c4.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* عنوان الصفحة */
+        .main-title {
+            width: 100%;
+            max-width: 1100px;
+            text-align: center;
+            color: #ffe67b;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 25px;
+            background: rgba(3, 15, 30, 0.8);
+            border-radius: 20px;
+            padding: 20px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 230, 123, 0.5);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .time-widgets-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .widget {
+            background: rgba(7, 18, 35, 0.75);
+            border: 1px solid rgba(160, 200, 255, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        .widget h3 {
+            margin: 0 0 15px;
+            color: #dfeaff;
+            font-size: 1.5rem;
+        }
+
+        .fancy-numbers {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            color: #9fe7ff;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(159, 231, 255, 0.7);
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .timer-controls input,
+        .task-input-container input {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px 15px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            min-width: 120px;
+        }
+
+        .timer-controls input::placeholder,
+        .task-input-container input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .timer-controls button,
+        .task-input-container button,
+        #add-task-btn {
+            background: linear-gradient(135deg, #6ec6ff, #3c7dff);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: 'Cairo', sans-serif;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 20px rgba(60, 125, 255, 0.45);
+        }
+
+        .timer-controls button:hover,
+        .task-input-container button:hover,
+        #add-task-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .task-input-container {
+            display: flex;
+            gap: 15px;
+            background: rgba(7, 18, 35, 0.75);
+            border: 1px solid rgba(160, 200, 255, 0.3);
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .task-input-container input {
+            flex: 1;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .main-title {
+                font-size: 1.8rem;
+                padding: 15px 20px;
+            }
+
+            .task-input-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="main-title">منظم المهام الذكي - ليلة النجوم</h1>
+
+    <div class="app-container">
+      <!-- حاوية الساعة والمؤقت -->
+      <div class="time-widgets-container">
+        
+        <!-- قسم الساعة -->
+        <div class="widget">
+          <h3>الساعة الآن</h3>
+          <div id="clock-display" class="fancy-numbers">00:00:00</div>
+        </div>
+
+        <!-- قسم المؤقت -->
+        <div class="widget">
+          <h3>المؤقت</h3>
+          <div id="timer-display" class="fancy-numbers">00:00</div>
+          <div class="timer-controls">
+            <input type="number" id="timer-input" placeholder="دقائق" min="1">
+            <button onclick="startTimer()">ابدأ</button>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- خانة إضافة المهام (أسفل الساعة والمؤقت) -->
+      <div class="task-input-container">
+        <input type="text" id="task-input" placeholder="أضف مهمة جديدة...">
+        <button id="add-task-btn">إضافة</button>
+      </div>
+    </div>
+</body>
+</html>

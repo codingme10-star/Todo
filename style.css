@@ -1,0 +1,91 @@
+/* استدعاء خط للأرقام وخط للنصوص العربية */
+@import url('[https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Tajawal:wght@400;700&display=swap](https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Tajawal:wght@400;700&display=swap)');
+
+.app-container {
+  font-family: 'Tajawal', sans-serif;
+  direction: rtl;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* الترتيب الأفقي للساعة والمؤقت */
+.time-widgets-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px; /* مسافة بين الودجت وخانة المهام */
+}
+
+.widget {
+  flex: 1;
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.widget h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+/* تنسيق الأرقام المزخرفة (الساعة والمؤقت) */
+.fancy-numbers {
+  font-family: 'Orbitron', sans-serif; /* الخط المزخرف */
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+  letter-spacing: 2px;
+  text-shadow: 0px 0px 8px rgba(44, 62, 80, 0.3); /* تأثير إضاءة خفيف */
+  margin-bottom: 10px;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.timer-controls input {
+  width: 60px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.timer-controls button, .task-input-container button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+  transition: 0.3s;
+}
+
+.timer-controls button:hover, .task-input-container button:hover {
+  background-color: #2980b9;
+}
+
+/* تنسيق خانة إضافة المهام */
+.task-input-container {
+  display: flex;
+  gap: 10px;
+}
+
+.task-input-container input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: 'Tajawal', sans-serif;
+}
