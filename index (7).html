@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>my_ToDo - مدير المهام الذكي</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%23f59e0b'/><text x='50' y='68' font-size='48' font-weight='900' font-family='Arial, sans-serif' fill='%230f172a' text-anchor='middle'>MT</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;700;900&family=Alexandria:wght@400;700;900&family=Changa:wght@400;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- STYLESHEET -->
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            transition: color 0.3s ease, background-image 0.5s ease;
+        }
+
+        .progress-box {
+            position: relative;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 1.75rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            padding: 2rem;
+            z-index: 1;
+        }
+
+        .blur-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .progress-rect-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.2);
+            stroke-width: 6;
+            rx: 1.75rem;
+            ry: 1.75rem;
+        }
+
+        .progress-rect-val {
+            fill: none;
+            stroke: var(--theme-color, #f59e0b);
+            stroke-width: 6;
+            rx: 1.75rem;
+            ry: 1.75rem;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.3s linear, stroke 0.3s ease;
+            stroke-linecap: round;
+        }
+
+        :root {
+            --theme-color: #f59e0b;
+        }
+
+        .custom-theme-btn {
+            background-color: var(--theme-color) !important;
+            color: #0f172a !important;
+        }
+
+        .font-tajawal { font-family: 'Tajawal', sans-serif; }
+        .font-cairo { font-family: 'Cairo', sans-serif; }
+        .font-alexandria { font-family: 'Alexandria', sans-serif; }
+        .font-changa { font-family: 'Changa', sans-serif; }
+        .font-amiri { font-family: 'Amiri', serif; }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--theme-color);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body id="body-bg" class="text-white min-h-screen flex flex-col justify-between transition-colors duration-500 font-tajawal">
+
+    <header class="w-full px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center max-w-7xl mx-auto gap-4">
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+            <div class="flex items-center gap-3">
+                <div class="custom-theme-btn p-1 rounded-2xl shadow-lg border border-white/15 w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center font-black text-xl tracking-tighter shadow-xl">
+                    MT
+                </div>
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-black tracking-wide drop-shadow-md">my_ToDo</h1>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap justify-center sm:justify-end w-full sm:w-auto">
+            <div class="bg-black/50 px-3.5 py-2 rounded-xl backdrop-blur-md border border-amber-500/40 flex items-center gap-2 shadow-lg" title="رصيد العملات الذهبية">
+                <i class="fa-solid fa-coins text-amber-400 text-base animate-bounce"></i>
+                <span id="coins-display" class="font-black text-amber-300 text-base">0</span>
+            </div>
+
+            <button onclick="toggleTaskManagerModal()" class="bg-black/40 hover:bg-black/60 p-2.5 sm:px-3.5 sm:py-2.5 rounded-xl backdrop-blur-sm transition text-sm font-bold flex items-center gap-2 shadow border border-white/15 active:scale-95" title="إدارة وتخصيص المهام اليومية">
+                <i class="fa-solid fa-list-check text-amber-400"></i>
+                <span class="hidden md:inline">إدارة المهام</span>
+            </button>
+
+            <button onclick="toggleEntertainmentModal()" class="bg-black/40 hover:bg-black/60 p-2.5 sm:px-3.5 sm:py-2.5 rounded-xl backdrop-blur-sm transition text-sm font-bold flex items-center gap-2 shadow border border-white/15 active:scale-95" title="الترفيه">
+                <i class="fa-solid fa-gamepad text-purple-400"></i>
+                <span class="hidden md:inline">الترفيه</span>
+            </button>
+
+            <button onclick="toggleSettingsModal()" class="bg-black/40 hover:bg-black/60 p-2.5 sm:px-3.5 sm:py-2.5 rounded-xl backdrop-blur-sm transition text-sm flex items-center gap-2 shadow border border-white/15 active:scale-95" title="التخصيص">
+                <i class="fa-solid fa-palette text-amber-400"></i>
+                <span class="hidden md:inline">التخصيص</span>
+            </button>
+
+            <button onclick="toggleSound()" id="sound-btn" class="bg-black/40 hover:bg-black/60 p-2.5 sm:px-3.5 sm:py-2.5 rounded-xl backdrop-blur-sm transition text-sm flex items-center gap-2 shadow border border-white/15 active:scale-95" title="الصوت">
+                <i class="fa-solid fa-volume-high" id="sound-icon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="w-full max-w-xl mx-auto px-4 flex-grow flex flex-col items-center justify-center my-4 sm:my-6">
+        <div class="bg-black/40 p-1.5 rounded-2xl flex gap-1 mb-6 backdrop-blur-sm border border-white/20 w-full max-w-md shadow-xl">
+            <button onclick="setMode('pomodoro')" id="btn-pomodoro" class="flex-1 py-3 rounded-xl text-xs sm:text-sm font-bold transition custom-theme-btn shadow">تركيز</button>
+            <button onclick="setMode('shortBreak')" id="btn-shortBreak" class="flex-1 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-white hover:bg-white/10">راحة قصيرة</button>
+            <button onclick="setMode('longBreak')" id="btn-longBreak" class="flex-1 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-white hover:bg-white/10">راحة طويلة</button>
+        </div>
+
+        <div class="relative w-full">
+            <div id="progress-card" class="progress-box border border-white/25 w-full text-center relative overflow-hidden flex flex-col items-center py-8 sm:py-10">
+                <svg class="progress-svg" id="progress-svg">
+                    <rect id="rect-bg" class="progress-rect-bg" x="3" y="3" width="99%" height="98%"></rect>
+                    <rect id="rect-val" class="progress-rect-val" x="3" y="3" width="99%" height="98%"></rect>
+                </svg>
+
+                <div class="text-6xl sm:text-8xl font-black tracking-widest my-4 font-mono drop-shadow-lg z-25 select-none" id="timer-display">
+                    25:00
+                </div>
+
+                <div class="flex items-center justify-center gap-3 w-full z-25 mt-4 px-2">
+                    <button onclick="resetTimer()" class="bg-black/40 hover:bg-black/60 border border-white/20 text-white font-bold p-4 rounded-2xl transition shadow-lg active:scale-95" title="إعادة ضبط">
+                        <i class="fa-solid fa-rotate-right text-xl"></i>
+                    </button>
+                    <button onclick="toggleTimer()" id="start-pause-btn" class="custom-theme-btn font-black text-lg sm:text-xl px-6 sm:px-8 py-4 rounded-2xl shadow-xl transition transform active:scale-95 flex-grow">
+                        ابدأ التركيز
+                    </button>
+                    <button onclick="openCustomTimeModal()" class="bg-black/40 hover:bg-black/60 border border-white/20 text-white font-bold p-4 rounded-2xl transition shadow-lg active:scale-95" title="تعديل وقت العداد">
+                        <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="task-manager-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 hidden">
+        <div class="blur-card text-white rounded-3xl p-5 sm:p-8 max-w-4xl w-full h-[90vh] overflow-y-auto shadow-2xl relative border border-white/20 flex flex-col">
+            <button onclick="toggleTaskManagerModal()" class="absolute top-4 left-4 sm:top-6 sm:left-6 text-gray-300 hover:text-white transition bg-black/50 p-2.5 rounded-full w-10 h-10 flex items-center justify-center active:scale-95 z-30">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-6 pr-2">
+                <div class="custom-theme-btn p-3 rounded-2xl">
+                    <i class="fa-solid fa-list-check text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-black">إدارة وتخصيص المهام اليومية</h2>
+                    <p class="text-xs sm:text-sm text-gray-300">أضف مهامك لكل يوم: مستطيل صغير لاختيار اليوم، ومستطيل كبير لكتابة المهام.</p>
+                </div>
+            </div>
+
+            <!-- نموذج إضافة / تعديل مهمة جديدة -->
+            <div class="bg-black/40 border border-white/15 p-4 sm:p-5 rounded-2xl mb-6 shadow-xl">
+                <h3 class="text-sm font-bold text-amber-300 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-plus"></i> إضافة جدول أو مهام ليوم جديد
+                </h3>
+                <div class="flex flex-col md:flex-row gap-3">
+                    <!-- مستطيل صغير لاختيار اليوم أو كتابته -->
+                    <div class="w-full md:w-1/3">
+                        <label class="block text-xs font-bold text-gray-300 mb-1">اليوم (مستطيل صغير):</label>
+                        <select id="new-task-day" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-400 font-bold mb-2">
+                            <option value="السبت">السبت</option>
+                            <option value="الأحد">الأحد</option>
+                            <option value="الاثنين">الاثنين</option>
+                            <option value="الثلاثاء">الثلاثاء</option>
+                            <option value="الأربعاء">الأربعاء</option>
+                            <option value="الخميس">الخميس</option>
+                            <option value="الجمعة">الجمعة</option>
+                            <option value="يوم مخصص">يوم مخصص (أخرى)</option>
+                        </select>
+                        <input type="text" id="custom-day-input" placeholder="اكتب اسم اليوم إذا لم يكن بالقائمة..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-400 hidden">
+                    </div>
+
+                    <!-- مستطيل كبير لكتابة المهام -->
+                    <div class="w-full md:w-2/3 flex flex-col justify-between">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-300 mb-1">المهام (مستطيل كبير - اكتب كل مهمة في سطر منفصل):</label>
+                            <textarea id="new-task-content" rows="3" placeholder="مهمة 1: محاضرة كذا من الساعة كذا...&#10;مهمة 2: حل الواجب..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-400 resize-none font-medium"></textarea>
+                        </div>
+                        <button onclick="addNewDayTasks()" class="mt-2 custom-theme-btn font-black py-2.5 px-6 rounded-xl shadow transition active:scale-95 text-sm flex items-center justify-center gap-2 self-end">
+                            <i class="fa-solid fa-plus"></i> حفظ وإضافة المهام
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قائمة المهام المخزنة -->
+            <div class="flex-grow overflow-y-auto space-y-4 pr-1" id="custom-tasks-container">
+                <!-- سيتم تعبئتها ديناميكياً -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Entertainment Modal -->
+    <div id="entertainment-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="blur-card text-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative border border-white/20 text-center">
+            <button onclick="toggleEntertainmentModal()" class="absolute top-5 left-5 text-gray-300 hover:text-white transition bg-black/50 p-2 rounded-full w-9 h-9 flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="w-20 h-20 bg-purple-600/30 border border-purple-400 rounded-3xl mx-auto flex items-center justify-center mb-4 shadow-lg">
+                <i class="fa-solid fa-gamepad text-4xl text-purple-300"></i>
+            </div>
+
+            <h2 class="text-2xl font-black mb-2">منطقة الترفيه والمكافآت</h2>
+            <p class="text-xs sm:text-sm text-gray-300 mb-6">استخدم العملات التي جمعتها من إكمال مهامك اليومية لفتح فترة الترفيه.</p>
+
+            <div id="entertainment-card" class="bg-black/40 border border-white/15 p-5 rounded-2xl mb-6 flex flex-col items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-playstation text-3xl text-indigo-400"></i>
+                    <div class="text-right">
+                        <h3 class="font-bold text-base sm:text-lg">جلسة Game PS3</h3>
+                        <p class="text-xs text-gray-400">لمدة نصف ساعة (تفتح طوال اليوم بعد تفعيلها وتقفل تلقائياً الساعة 12:00 ليلاً)</p>
+                    </div>
+                </div>
+
+                <div id="ent-status-container" class="w-full mt-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Modification Modal -->
+    <div id="time-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900/95 backdrop-blur-md text-white rounded-3xl p-6 sm:p-8 max-w-sm w-full border border-white/15 shadow-2xl relative">
+            <button onclick="openCustomTimeModal()" class="absolute top-5 left-5 text-gray-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-clock text-amber-400"></i> تعديل دقائق العداد
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">عدد الدقائق الجديدة:</label>
+                    <input type="number" id="custom-minutes-input" min="1" max="180" value="25" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-lg text-center font-bold focus:outline-none focus:border-amber-400">
+                </div>
+                <button onclick="applyCustomTime()" class="w-full custom-theme-btn font-bold py-3.5 rounded-2xl shadow-lg transition active:scale-95">
+                    تطبيق وتحديث العداد
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900/95 backdrop-blur-md text-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-white/15 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="toggleSettingsModal()" class="absolute top-5 left-5 text-gray-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            
+            <div class="flex items-center gap-3 mb-6">
+                <div class="custom-theme-btn p-3 rounded-2xl">
+                    <i class="fa-solid fa-palette text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold">تخصيص المظهر والأنماط</h2>
+                    <p class="text-xs text-gray-400">اختر لون التطبيق الرئيسي والخلفية والخط</p>
+                </div>
+            </div>
+
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">نوع الخط:</label>
+                    <select id="font-select" onchange="changeFont(this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-400">
+                        <option value="font-tajawal">Tajawal - تجول (الافتراضي)</option>
+                        <option value="font-cairo">Cairo - القاهرة</option>
+                        <option value="font-alexandria">Alexandria - الإسكندرية</option>
+                        <option value="font-changa">Changa - تشانجا</option>
+                        <option value="font-amiri">Amiri - أميري (كلاسيكي)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">لون الأزرار والشريط:</label>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="theme-color-picker" value="#f59e0b" onchange="updateThemeColor()" class="w-14 h-11 rounded-xl bg-transparent cursor-pointer border border-slate-700">
+                        <span id="theme-color-code" class="text-xs font-mono text-gray-300">#f59e0b</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">إضافة خلفية خاصة من جهازك:</label>
+                    <input type="file" id="custom-bg-input" accept="image/*" onchange="handleCustomBgUpload(event)" class="hidden">
+                    <button onclick="document.getElementById('custom-bg-input').click()" class="w-full p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-upload text-amber-400"></i> اختار صورة من جهازك
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">أو اختر خلفية جاهزة:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="changeBackground('https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1920&auto=format&fit=crop')" class="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-city text-amber-400"></i> نيويورك الأصلي
+                        </button>
+                        <button onclick="changeBackground('https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=1920&auto=format&fit=crop')" class="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-moon text-blue-400"></i> نيويورك ليلاً
+                        </button>
+                        <button onclick="changeBackground('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1920&auto=format&fit=crop')" class="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-mountain text-emerald-400"></i> طبيعة هادئة
+                        </button>
+                        <button onclick="changeBackground('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1920&auto=format&fit=crop')" class="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-star text-purple-400"></i> سماء النجوم
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="resetCustomization()" class="w-full bg-slate-800 hover:bg-slate-700 text-gray-300 text-xs font-bold py-3 rounded-xl transition">
+                    استعادة الإعدادات الافتراضية
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 text-white/70 text-xs sm:text-sm border-t border-white/15 mt-auto bg-black/40 backdrop-blur-sm">
+        <p>my_ToDo - متوافق مع كافة الأجهزة اللوحية والمحمولة 🚀</p>
+    </footer>
+
+    <script>
+        // هيكل بيانات المهام المخصص (افتراضياً فارغ أو يحتوي على أمثلة أولية خفيفة يمكن للمستخدم تعديلها أو حذفها)
+        let customScheduleData = JSON.parse(localStorage.getItem('my_custom_schedule_data')) || [
+            {
+                id: 'day-1',
+                dayName: 'السبت',
+                tasks: [
+                    { text: 'مراجعة الملاحظات والدروس', completed: false },
+                    { text: 'حل واجب مادة الرياضيات', completed: false }
+                ]
+            },
+            {
+                id: 'day-2',
+                dayName: 'الأحد',
+                tasks: [
+                    { text: 'محاضرة الفيزياء الصباحية', completed: false }
+                ]
+            }
+        ];
+
+        let savedPomodoroTime = parseInt(localStorage.getItem('pomo_custom_time_pomodoro')) || (25 * 60);
+        let savedShortBreakTime = parseInt(localStorage.getItem('pomo_custom_time_shortBreak')) || (5 * 60);
+        let savedLongBreakTime = parseInt(localStorage.getItem('pomo_custom_time_longBreak')) || (15 * 60);
+
+        let timerModes = {
+            pomodoro: { time: savedPomodoroTime, name: 'ابدأ التركيز' },
+            shortBreak: { time: savedShortBreakTime, name: 'ابدأ الراحة القصيرة' },
+            longBreak: { time: savedLongBreakTime, name: 'ابدأ الراحة الطويلة' }
+        };
+
+        let currentMode = 'pomodoro';
+        let timeLeft = timerModes[currentMode].time;
+        let totalTime = timerModes[currentMode].time;
+        let timerId = null;
+        let isRunning = false;
+        let soundEnabled = true;
+
+        let coins = parseInt(localStorage.getItem('pomo_coins')) || 0;
+        let entUnlockedDate = localStorage.getItem('pomo_ent_unlocked_date') || null;
+
+        // مراقبة اختيار اليوم المخصص في النموذج
+        document.getElementById('new-task-day').addEventListener('change', function() {
+            const customInput = document.getElementById('custom-day-input');
+            if (this.value === 'يوم مخصص') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+            }
+        });
+
+        function saveCoins() {
+            try {
+                localStorage.setItem('pomo_coins', coins);
+            } catch (e) {}
+            updateCoinsDisplay();
+        }
+
+        function updateCoinsDisplay() {
+            const el = document.getElementById('coins-display');
+            if(el) el.innerText = coins;
+        }
+
+        function buildCustomScheduleUI() {
+            const container = document.getElementById('custom-tasks-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (customScheduleData.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-black/20 rounded-3xl border border-white/10">
+                        <i class="fa-solid fa-clipboard-list text-4xl text-gray-500 mb-3"></i>
+                        <p class="text-gray-400 text-sm">لا توجد أيام أو مهام مضافة بعد. استخدم النموذج بالأعلى لإضافة جدولك الخاص!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            customScheduleData.forEach((dayItem, index) => {
+                // التحقق مما إذا كانت جميع مهام هذا اليوم مكتملة
+                let allCompleted = dayItem.tasks.length > 0 && dayItem.tasks.every(t => t.completed);
+
+                const card = document.createElement('div');
+                card.className = allCompleted 
+                    ? "bg-emerald-950/40 backdrop-blur-md border border-emerald-500/50 p-5 rounded-3xl relative overflow-hidden flex flex-col justify-between shadow-xl transition-all duration-300"
+                    : "bg-black/30 backdrop-blur-md border border-white/20 p-5 rounded-3xl relative overflow-hidden flex flex-col justify-between shadow-xl transition-all duration-300";
+
+                let tasksHtml = '<div class="space-y-2 mb-4"><ul class="space-y-2">';
+                dayItem.tasks.forEach((task, tIndex) => {
+                    tasksHtml += `
+                        <li class="flex items-center justify-between p-3 rounded-xl bg-black/30 border border-white/10 transition text-xs sm:text-sm">
+                            <span class="task-text ${task.completed ? 'line-through text-gray-400' : 'text-gray-200'}">${escapeHtml(task.text)}</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" class="custom-checkbox w-6 h-6 accent-amber-500 rounded-lg cursor-pointer" ${task.completed ? 'checked' : ''} onchange="toggleTaskCompletion('${dayItem.id}', ${tIndex})">
+                                <button onclick="deleteSingleTask('${dayItem.id}', ${tIndex})" class="text-red-400 hover:text-red-300 p-1 text-xs" title="حذف المهمة"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </li>
+                    `;
+                });
+                tasksHtml += '</ul></div>';
+
+                let headerHtml = `
+                    <div class="flex items-center justify-between border-t border-white/15 pt-4 mt-2">
+                        <h3 class="${allCompleted ? 'text-emerald-300' : 'text-amber-300'} font-black text-lg sm:text-xl flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            ${escapeHtml(dayItem.dayName)}
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs ${allCompleted ? 'text-emerald-300 font-bold' : 'text-gray-300'}">${allCompleted ? 'مكتمل + عملات' : 'قيد العمل'}</span>
+                            <button onclick="deleteDayGroup('${dayItem.id}')" class="bg-red-500/20 hover:bg-red-500/40 text-red-300 p-2 rounded-xl text-xs transition" title="حذف اليوم بالكامل">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // طبقة احتفال واضحة إذا اكتمل اليوم
+                let overlayHtml = `
+                    <div class="absolute inset-0 bg-emerald-950/70 backdrop-blur-[3px] flex flex-col items-center justify-center z-20 pointer-events-none ${allCompleted ? '' : 'hidden'} transition-opacity duration-300">
+                        <div class="w-16 h-16 bg-emerald-500/30 border border-emerald-400 rounded-full flex items-center justify-center mb-2 shadow-lg animate-bounce">
+                            <i class="fa-solid fa-check text-3xl text-emerald-300"></i>
+                        </div>
+                        <span class="font-black text-emerald-200 text-base sm:text-lg tracking-wide drop-shadow">تم إكمال يوم ${escapeHtml(dayItem.dayName)}!</span>
+                    </div>
+                `;
+
+                card.innerHTML = tasksHtml + headerHtml + overlayHtml;
+                container.appendChild(card);
+            });
+        }
+
+        function addNewDayTasks() {
+            const selectDay = document.getElementById('new-task-day');
+            const customInput = document.getElementById('custom-day-input');
+            const contentArea = document.getElementById('new-task-content');
+
+            let dayName = selectDay.value;
+            if (dayName === 'يوم مخصص') {
+                dayName = customInput.value.trim();
+                if (!dayName) {
+                    showCustomMessage('يرجى كتابة اسم اليوم المخصص.');
+                    return;
+                }
+            }
+
+            const rawText = contentArea.value.trim();
+            if (!rawText) {
+                showCustomMessage('يرجى كتابة المهام في المستطيل الكبير.');
+                return;
+            }
+
+            // تقسيم النص إلى مهام متعددة بناءً على الأسطر الجديدة
+            const lines = rawText.split('\n').filter(line => line.trim() !== '');
+            const newTasksList = lines.map(line => ({ text: line.trim(), completed: false }));
+
+            // التحقق مما إذا كان اليوم موجود مسبقاً لتحديثه أو إضافة يوم جديد
+            let existingDay = customScheduleData.find(d => d.dayName === dayName);
+            if (existingDay) {
+                existingDay.tasks.push(...newTasksList);
+            } else {
+                customScheduleData.push({
+                    id: 'day-' + Date.now(),
+                    dayName: dayName,
+                    tasks: newTasksList
+                });
+            }
+
+            saveCustomSchedule();
+            buildCustomScheduleUI();
+
+            // إعادة تعيين الحقول
+            contentArea.value = '';
+            customInput.value = '';
+            selectDay.selectedIndex = 0;
+            customInput.classList.add('hidden');
+        }
+
+        function toggleTaskCompletion(dayId, taskIndex) {
+            const dayObj = customScheduleData.find(d => d.id === dayId);
+            if (!dayObj) return;
+
+            const task = dayObj.tasks[taskIndex];
+            const wasCompleted = task.completed;
+            task.completed = !task.completed;
+
+            // إذا اكتملت المهمة نمنح عملات للمستخدم (مثال: 10 عملات لكل مهمة)
+            if (!wasCompleted && task.completed) {
+                coins += 10;
+                saveCoins();
+            } else if (wasCompleted && !task.completed) {
+                coins = Math.max(0, coins - 10);
+                saveCoins();
+            }
+
+            saveCustomSchedule();
+            buildCustomScheduleUI();
+        }
+
+        function deleteSingleTask(dayId, taskIndex) {
+            const dayObj = customScheduleData.find(d => d.id === dayId);
+            if (!dayObj) return;
+            dayObj.tasks.splice(taskIndex, 1);
+            if (dayObj.tasks.length === 0) {
+                customScheduleData = customScheduleData.filter(d => d.id !== dayId);
+            }
+            saveCustomSchedule();
+            buildCustomScheduleUI();
+        }
+
+        function deleteDayGroup(dayId) {
+            customScheduleData = customScheduleData.filter(d => d.id !== dayId);
+            saveCustomSchedule();
+            buildCustomScheduleUI();
+        }
+
+        function saveCustomSchedule() {
+            try {
+                localStorage.setItem('my_custom_schedule_data', JSON.stringify(customScheduleData));
+            } catch (e) {}
+        }
+
+        function unlockEntertainment() {
+            if (coins < 50) {
+                showCustomMessage('لا يوجد لديك عملات كافية! يلزمك 50 عملة لفتح الترفيه.');
+                return;
+            }
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            coins -= 50;
+            entUnlockedDate = todayStr;
+            try {
+                localStorage.setItem('pomo_ent_unlocked_date', todayStr);
+            } catch (e) {}
+            saveCoins();
+            renderEntertainmentStatus();
+        }
+
+        function renderEntertainmentStatus() {
+            const container = document.getElementById('ent-status-container');
+            if (!container) return;
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            const isUnlocked = (entUnlockedDate === todayStr);
+
+            if (isUnlocked) {
+                container.innerHTML = `
+                    <div class="bg-emerald-500/20 border border-emerald-500/50 p-3 rounded-xl text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-lock-open text-base"></i>
+                        <span>مهمة الترفيه Game PS3 مفتوحة اليوم!</span>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="unlockEntertainment()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm active:scale-95">
+                        <i class="fa-solid fa-key"></i>
+                        <span>فتح Game PS3 مقابل 50 عملة</span>
+                    </button>
+                `;
+            }
+        }
+
+        function handleCustomBgUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const maxDim = 1280;
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                            } else {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        const compressedUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        changeBackground(compressedUrl);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function changeBackground(imageUrl) {
+            document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)), url('${imageUrl}')`;
+            try {
+                localStorage.setItem('pomodoro_bg_ny', imageUrl);
+            } catch (e) {}
+        }
+
+        function changeFont(fontClass) {
+            const body = document.getElementById('body-bg');
+            body.classList.remove('font-tajawal', 'font-cairo', 'font-alexandria', 'font-changa', 'font-amiri');
+            body.classList.add(fontClass);
+            try {
+                localStorage.setItem('pomodoro_font_ny', fontClass);
+            } catch (e) {}
+        }
+
+        function updateThemeColor() {
+            const color = document.getElementById('theme-color-picker').value;
+            document.getElementById('theme-color-code').innerText = color;
+            document.documentElement.style.setProperty('--theme-color', color);
+            try {
+                localStorage.setItem('pomodoro_theme_color_ny', color);
+            } catch (e) {}
+        }
+
+        function setMode(mode) {
+            if (isRunning) {
+                pauseTimer();
+            }
+            currentMode = mode;
+            timeLeft = timerModes[mode].time;
+            totalTime = timerModes[mode].time;
+            
+            ['pomodoro', 'shortBreak', 'longBreak'].forEach(m => {
+                const btn = document.getElementById(`btn-${m}`);
+                if (m === mode) {
+                    btn.className = "flex-1 py-3 rounded-xl text-xs sm:text-sm font-bold transition custom-theme-btn shadow";
+                } else {
+                    btn.className = "flex-1 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-white hover:bg-white/10";
+                }
+            });
+            
+            document.getElementById('start-pause-btn').innerText = timerModes[mode].name;
+            updateDisplay();
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            isRunning = true;
+            document.getElementById('start-pause-btn').innerText = 'إيقاف مؤقت';
+            timerId = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateDisplay();
+                } else {
+                    clearInterval(timerId);
+                    isRunning = false;
+                    playBeep();
+                    showCustomMessage('انتهى الوقت! ممتاز، خذ استراحة أو انتقل للمهمة التالية.');
+                    resetTimer();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            clearInterval(timerId);
+            document.getElementById('start-pause-btn').innerText = 'استمرار';
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = timerModes[currentMode].time;
+            document.getElementById('start-pause-btn').innerText = timerModes[currentMode].name;
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timer-display').innerText = formatted;
+            document.title = "my_ToDo";
+            updateBorderProgress();
+        }
+
+        function updateBorderProgress() {
+            const rectVal = document.getElementById('rect-val');
+            if (!rectVal) return;
+            const length = 1000;
+            const progress = (totalTime - timeLeft) / totalTime;
+            const offset = length - (progress * length);
+            rectVal.style.strokeDashoffset = offset;
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high";
+            } else {
+                icon.className = "fa-solid fa-volume-xmark";
+            }
+        }
+
+        function playBeep() {
+            if (!soundEnabled) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const now = audioCtx.currentTime;
+                const freqs = [523.25, 659.25, 783.99, 1046.50];
+                freqs.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.3, now + idx * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.15 + 0.4);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.15);
+                    osc.stop(now + idx * 0.15 + 0.4);
+                });
+            } catch (e) {}
+        }
+
+        function showCustomMessage(msg) {
+            const existing = document.getElementById('custom-msg-box');
+            if (existing) existing.remove();
+
+            const box = document.createElement('div');
+            box.id = 'custom-msg-box';
+            box.className = "fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4";
+            box.innerHTML = `
+                <div class="bg-slate-900 border border-white/20 p-6 rounded-3xl max-w-sm w-full text-center shadow-2xl animate-fade-in">
+                    <div class="w-14 h-14 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+                    <p class="text-sm font-bold text-white mb-6 leading-relaxed">${escapeHtml(msg)}</p>
+                    <button onclick="document.getElementById('custom-msg-box').remove()" class="w-full custom-theme-btn font-black py-3 rounded-xl shadow transition active:scale-95">
+                        حسناً
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(box);
+        }
+
+        function toggleTaskManagerModal() {
+            document.getElementById('task-manager-modal').classList.toggle('hidden');
+            buildCustomScheduleUI();
+        }
+
+        function toggleEntertainmentModal() {
+            document.getElementById('entertainment-modal').classList.toggle('hidden');
+            renderEntertainmentStatus();
+        }
+
+        function toggleSettingsModal() {
+            document.getElementById('settings-modal').classList.toggle('hidden');
+        }
+
+        function openCustomTimeModal() {
+            document.getElementById('time-modal').classList.toggle('hidden');
+            document.getElementById('custom-minutes-input').value = Math.floor(timeLeft / 60);
+        }
+
+        function applyCustomTime() {
+            const mins = parseInt(document.getElementById('custom-minutes-input').value);
+            if (!isNaN(mins) && mins > 0 && mins <= 180) {
+                if (isRunning) pauseTimer();
+                timerModes[currentMode].time = mins * 60;
+                timeLeft = timerModes[currentMode].time;
+                totalTime = timerModes[currentMode].time;
+                
+                try {
+                    localStorage.setItem(`pomo_custom_time_${currentMode}`, timerModes[currentMode].time);
+                } catch (e) {}
+
+                updateDisplay();
+                openCustomTimeModal();
+            } else {
+                showCustomMessage('يرجى إدخال عدد دقائق صحيح بين 1 و 180.');
+            }
+        }
+
+        function loadCustomizations() {
+            const savedBg = localStorage.getItem('pomodoro_bg_ny');
+            if (savedBg) changeBackground(savedBg);
+
+            const savedFont = localStorage.getItem('pomodoro_font_ny');
+            if (savedFont) {
+                changeFont(savedFont);
+                document.getElementById('font-select').value = savedFont;
+            }
+
+            const savedColor = localStorage.getItem('pomodoro_theme_color_ny');
+            if (savedColor) {
+                document.getElementById('theme-color-picker').value = savedColor;
+                document.getElementById('theme-color-code').innerText = savedColor;
+                document.documentElement.style.setProperty('--theme-color', savedColor);
+            }
+        }
+
+        function resetCustomization() {
+            localStorage.removeItem('pomodoro_bg_ny');
+            localStorage.removeItem('pomodoro_font_ny');
+            localStorage.removeItem('pomodoro_theme_color_ny');
+            localStorage.removeItem('pomo_custom_time_pomodoro');
+            localStorage.removeItem('pomo_custom_time_shortBreak');
+            localStorage.removeItem('pomo_custom_time_longBreak');
+            localStorage.removeItem('my_custom_schedule_data');
+            location.reload();
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        window.addEventListener('resize', updateBorderProgress);
+
+        window.onload = function() {
+            loadCustomizations();
+            updateCoinsDisplay();
+            buildCustomScheduleUI();
+            renderEntertainmentStatus();
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
